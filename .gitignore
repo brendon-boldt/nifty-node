@@ -1,0 +1,4 @@
+*.dat
+db
+node_modules
+
