@@ -9,8 +9,7 @@ var server = http.createServer(function (req, res) {
   if (/^\/file/.test(u.pathname)) {
     result = getFile(u.query["name"],res)
   } else if (/^\/new/.test(u.pathname)) {
-    result = req.on('data',db.newQuery)
-    res.end()
+    req.on('data',function (data) {db.newQuery(data, res)})
   } else if (/^\/get/.test(u.pathname)) {
     db.getQuery( function (err,data) {
       console.log(data)
@@ -30,11 +29,11 @@ var server = http.createServer(function (req, res) {
 var receiveImage = function (req, res) {
   var fs = require('fs')
   //fs.createWriteStream('outfile').pipe(req)
-  /*
-  req.on('data', function (data) {
-    fs.createWriteStream('outfile').pipe(data)
-  })
-  */
+  
+  //req.on('data', function (data) {
+  //  fs.createWriteStream('outfile').pipe(data)
+  //[bracket] )
+  
   res.writeHead(200)
   res.end("Transmission successful.")
 }

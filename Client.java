@@ -2,23 +2,21 @@
 import java.net.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import org.json.JSONObject;
 
 public class Client {
-  
+   
   public static void main( String[] args) {
-    //getFile("http://localhost:8000/file?name=db.js");
-    //getFile("http://localhost:8000/new");
-    //getFile2("http://localhost:8000/new");
-    newQuery("","");
+    String idString = newQuery("Philo?","Socrates");
+    System.out.println(idString);
+    JSONObject query = getQuery(idString);
+    System.out.println(query.toString());
   }
-  
-  public static void newQuery(String question, String answer) {
-    System.out.println(question+"\n"+answer);
-    byte[] data = "{\"question\":\"Philosopher?\",\"answer\":\"Socrates\"}"
-      .getBytes(StandardCharsets.UTF_8);
+ 
+  public static char[] httpPost(String urlString, byte[] data) {
     HttpURLConnection con = null;
+    char[] response = new char[0x400];
     try {
-      String urlString = "http://localhost:8000/new";
       URL url = new URL(urlString);
       con = (HttpURLConnection) url.openConnection();
       con.setRequestMethod("POST");
@@ -29,12 +27,14 @@ public class Client {
       con.setDoInput (true);
       con.setDoOutput(true);
 
-      DataOutputStream dos = new DataOutputStream (con.getOutputStream ());
-      dos.write(data);
-      dos.flush();
-      dos.close();
+      DataOutputStream out = new DataOutputStream (con.getOutputStream ());
+      out.write(data);
+      out.flush();
+      out.close();
 
-      con.getInputStream();
+      BufferedReader in = new BufferedReader(new InputStreamReader(
+            con.getInputStream(),"UTF-8"));
+      in.read(response);
 
     } catch (Exception e) {
       e.printStackTrace(); 
@@ -43,6 +43,7 @@ public class Client {
         con.disconnect();
       }
     }
+    return response;
 
   }
 
@@ -64,36 +65,26 @@ public class Client {
       e.printStackTrace();
     } 
   }
-
-  public static void getFile2(String urlString) {
-    byte[] data = "{\"question\":\"Philosopher?\",\"answer\":\"Socrates\"}"
-      .getBytes(StandardCharsets.UTF_8);
-    HttpURLConnection con = null;
-    try {
-      URL url = new URL(urlString);
-      con = (HttpURLConnection) url.openConnection();
-      con.setRequestMethod("GET");
-
-      con.setRequestProperty("charset","utf-8");
-      con.setRequestProperty("Content-Length", Integer.toString(data.length));
-      con.setUseCaches(false);
-      con.setDoInput (true);
-      con.setDoOutput(true);
-
-      DataOutputStream dos = new DataOutputStream (con.getOutputStream ());
-      dos.write(data);
-      dos.flush();
-      dos.close();
-
-      InputStream is = con.getInputStream();
-      BufferedReader rd = new BufferedReader(new InputStreamReader(is));
-      String line;
-      while ((line = rd.readLine()) != null) {
-        System.out.println(line);
-      }
-      
-    } catch (Exception e) {
-      e.printStackTrace();
-    } 
+   
+  public static String newQuery(String question, String answer) {
+    String idString = null;
+    String dataString = "{\"question\":\"" + question + "\",\"answer\":\"" + answer + "\"}";
+    byte[] data = dataString.getBytes(StandardCharsets.UTF_8);
+    //idString = new String (httpPost("http://localhost:8000/new", data),"UTF-8");
+    idString = new String(httpPost("http://localhost:8000/new", data));
+    return idString;
   }
+
+  public static JSONObject getQuery(String idString) {
+    char[] queryData = httpPost("http://localhost:8000/get",
+        idString.getBytes(StandardCharsets.UTF_8));
+    //System.out.println(queryData.toString());
+    JSONObject queryJson = null;
+    try {
+       //queryJson = new JSONObject(new String(queryData,"UTF-8"));
+       queryJson = new JSONObject(new String(queryData));
+    } catch (Exception e) {e.printStackTrace(); }
+    return queryJson;
+  }
+
 }
