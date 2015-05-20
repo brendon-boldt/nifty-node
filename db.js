@@ -1,28 +1,56 @@
-var m = require('mongoose')
-var db = m.connection
+var mongoose = require('mongoose')
+var ObjectId = require('mongoose').Types.ObjectId
+var db = mongoose.connection
 db.on('error', console.error)
 db.once('open', function () {
-  Query.remove({}, function (){});
 })
-m.connect('mongodb://localhost/test')
+mongoose.connect('mongodb://localhost/test')
 
-var qSchema = new m.Schema({
+var querySchema = new mongoose.Schema({
   question: String,
-  response: String
+  answer: String,
+  responses:[
+    {text: String}
+  ]
 })
 
-var Query = m.model('Query', qSchema);
+var Query = mongoose.model('Query', querySchema);
 
-exports.parseQuery = function (json) {
+// Begin removal callback
+Query.remove({}, function (){
+
+exports.newQuery = function (json) {
   try {
-    var q = new Query(JSON.parse(json.toString()))
-  q.save(function (err) {
-    Query.find(function (err,data){
-      console.log(data[0]['question'])
-      console.log(data[0]['response'])
+    var newQuery = new Query(JSON.parse(json.toString()))
+    newQuery.save(function (err) {
+      Query.find(function (err,data){
+        console.log(data[0]['question'])
+        console.log(data[0]['answer'])
+      })
     })
-  })
-    } catch (e) {
+  } catch (e) {
       console.error(e) 
-    }
+  }
 }
+
+exports.getQuery = function (callback) {
+  try {
+    Query.find(callback)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+exports.respondToQuery = function (queryId, json) {
+  try {
+    console.log("ObjectId: " + ObjectId(queryId))
+    Query.findOne({'_id':ObjectId(queryId)}, function (err,data) {
+      data.responses.push(JSON.parse(json).text)
+      console.log(data)
+    })
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+});
