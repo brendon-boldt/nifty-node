@@ -12,6 +12,8 @@ public class Client {
     JSONObject query = getQuery(queryIdString);
     System.out.println(query.toString());
     String responseIdString = respondToQuery(queryIdString,"Plato");
+    responseIdString = respondToQuery(queryIdString,"Anaximander");
+    responseIdString = respondToQuery(queryIdString,"Aristotle");
     System.out.println(responseIdString);
   }
 
@@ -100,7 +102,6 @@ public class Client {
 
   public static String respondToQuery(String idString, String response) {
     String jsonString = "{\"queryId\":\"" + idString + "\",\"response\":{\"text\":\"" + response + "\"}}";
-    System.out.println(jsonString.length());
     return new String(httpPost("http://localhost:8000/respond",
           jsonString.getBytes(StandardCharsets.UTF_8)));
   }

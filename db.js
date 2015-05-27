@@ -62,12 +62,13 @@ exports.respondToQuery = function (jsonBuffer, res) {
       Query.findOne({'_id':ObjectId(json['queryId'])}, function (err,query) {
         if (!err) {
           query.responseIds.push(ObjectId(newResponse['_id']));
+          query.save();
           console.log(query);
           Response.findOne({'_id':query.responseIds[0]}, function (err, resp) {
           //Response.findOne({'_id':newResponse['_id']}, function (err, resp) {
           //Response.find({}, function (err, resp) {
-            console.log("newR: " + newResponse['_id']);
-            console.log("arrR: " + query.responseIds[0]);
+            //console.log("newR: " + newResponse['_id']);
+            //console.log("arrR: " + query.responseIds[0]);
             console.log(resp);
           });
         }
