@@ -11,16 +11,15 @@ var server = http.createServer(function (req, res) {
   } else if (/^\/new/.test(u.pathname)) {
     req.on('data',function (data) {db.newQuery(data, res)})
   } else if (/^\/get/.test(u.pathname)) {
+    // This function may need to be moved to db.js
     db.getQuery( function (err,data) {
-      console.log(data)
-      console.log(typeof data['_id'])
-      console.log(data['_id'])
-      res.end(data.toString())
+      console.log("Gotten data:" + data);
+      res.end(data.toString());
     })
   } else if (/^\/respond/.test(u.pathname)) {
     result = req.on('data', function (data) {
-      db.respondToQuery(data['QueryId'],data['json'])}
-      )
+        db.respondToQuery(data, res)
+    })
   } else if (/^\/image/.test(u.pathname)) {
     result = receiveImage(req, res)
   }
